@@ -1,0 +1,14 @@
+{
+    "ACCOUNT_NAME": "stdatapcc02",
+    "TEMP_CONTAINER_NAME": "operations",
+    "TEMP_ROOT_PREFIX": "DOSE/",
+    "TEMP_SAS_TOKEN": "?sv=2025-07-05&spr=https&st=2026-08-17T19%3A29%3A48Z&se=2026-08-24T19%3A29%3A00Z&skoid=540a371d-ba1f-42e5-8889-2fbc4a1efdcd&sktid=30e9867e-8b91-4d13-8fe0-9463f1d5dfa4&skt=2026-08-17T19%3A29%3A48Z&ske=2026-08-24T19%3A29%3A00Z&sks=b&skv=2025-07-05&sr=c&sp=racwltf&sig=mc8YYzb2RdoFmIEQB%2B3fYdPZ5B8wI%2BOgkeLY4B5yl74%3D",
+
+    "HR_CONTAINER_NAME": "dataanalysis",
+    "HR_ROOT_PREFIX": "DoseData/",
+    "HR_SAS_TOKEN": "?sv=2025-07-05&spr=https&st=2026-08-18T12%3A47%3A39Z&se=2026-08-25T12%3A47%3A00Z&skoid=540a371d-ba1f-42e5-8889-2fbc4a1efdcd&sktid=30e9867e-8b91-4d13-8fe0-9463f1d5dfa4&skt=2026-08-18T12%3A47%3A39Z&ske=2026-08-25T12%3A47%3A00Z&sks=b&skv=2025-07-05&sr=c&sp=racwltf&sig=4sOIR1WaUxkltNALD8K5YneL4BjjhhSOGSuZwhQaTGQ%3D",
+
+    "RAW_TEMP_FOLDER": "TEMP",
+    "IGNORE_FILE": "PREVIEW"
+}
+
