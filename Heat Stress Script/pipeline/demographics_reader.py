@@ -9,7 +9,10 @@ def read_demographics():
 
     file = askopenfilename(
         title="Select Demographics File",
-        filetypes=[("Excel Files", "*.xlsx")]
+        filetypes=[
+            ("Excel Files", "*.xlsx"),
+            ("All Files", "*.*")
+        ]
     )
 
     if not file:
@@ -37,8 +40,9 @@ def read_demographics():
         weight = row["wt_kg"]
 
         demographics[pid] = {
-            "Sex": sex,
-            "Weight": weight
+            "Sex": row["Sex"],
+            "Weight": row["Weight"], 
+            "Age": row["Age"]
         }
 
     return demographics
