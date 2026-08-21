@@ -41,7 +41,7 @@ def read_demographics():
 
         demographics[pid] = {
             "Sex": row["Sex"],
-            "Weight": row["Weight"], 
+            "Weight": row["wt_kg"], 
             "Age": row["Age"]
         }
 

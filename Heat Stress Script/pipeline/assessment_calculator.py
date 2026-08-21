@@ -90,11 +90,63 @@ def calculate_assessment(hr_df, sex, weight, age):
     # ============================================================
     # HR calculations
     # ============================================================
-
+    
+    # HR Max
+    # Use the maximum valid BPM value
     hr_max = bpm.max()
-
-    hr_rest = bpm.min()
-
+    
+    
+    # HR Rest / Minimum HR
+    # Exclude rows where Ave IBI contains
+    # "Too few valid IBI points to analyse"
+    
+    ibi_col = None
+    
+    for col in df.columns:
+        if str(col).strip().lower() == "ave ibi (ms)":
+            ibi_col = col
+            break
+    
+    
+    if ibi_col is None:
+    
+        raise ValueError(
+            "Ave IBI (ms) column not found. "
+            f"Available columns: {df.columns.tolist()}"
+        )
+    
+    
+    # Convert Ave IBI to numeric
+    # Text such as:
+    # "Too few valid IBI points to analyse"
+    # becomes NaN and will therefore be excluded.
+    
+    ibi_numeric = pd.to_numeric(
+        df[ibi_col],
+        errors="coerce"
+    )
+    
+    
+    # Only use BPM values from rows with
+    # valid numeric Ave IBI values
+    
+    valid_rest_bpm = bpm[
+        ibi_numeric.notna()
+    ]
+    
+    
+    if valid_rest_bpm.empty:
+    
+        raise ValueError(
+            "No valid BPM values found after "
+            "excluding invalid IBI points."
+        )
+    
+    
+    hr_rest = valid_rest_bpm.min()
+    
+    
+    # Heart Rate Reserve
     hrr = hr_max - hr_rest
 
 
@@ -127,6 +179,7 @@ def calculate_assessment(hr_df, sex, weight, age):
 
     mr = ee * 16.67
 
+    average_ee = ee.mean()
     average_mr = mr.mean()
 
 
@@ -189,7 +242,7 @@ def calculate_assessment(hr_df, sex, weight, age):
         ),
 
         "Energy Expenditure (kcal/min)": round(
-            ee,
+            average_ee,
             2
         ),
 
