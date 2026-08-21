@@ -20,7 +20,7 @@ def classify_work_intensity(mr):
         return "Very Heavy"
 
 
-def calculate_assessment(hr_df, sex, weight):
+def calculate_assessment(hr_df, sex, weight, age):
 
     # ============================================================
     # Copy HR data
@@ -75,6 +75,9 @@ def calculate_assessment(hr_df, sex, weight):
         df[bpm_col],
         errors="coerce"
     ).dropna()
+    
+    # Exclude invalid zero BPM values
+    bpm = bpm[bpm > 0]
 
 
     if bpm.empty:
@@ -99,12 +102,22 @@ def calculate_assessment(hr_df, sex, weight):
     # Energy Expenditure
     # ============================================================
 
+    gender = 1 if sex.lower() == "male" else 0
+ 
     ee = (
-        0.051
-        + (0.164 * hrr)
-        - (2.271 * sex)
-        + (0.075 * weight)
-        - (0.009 * hr_rest)
+        gender * (
+            -55.0969
+            + 0.6309 * bpm
+            + 0.1988 * weight
+            + 0.2017 * age
+        )
+        +
+        (1 - gender) * (
+            -20.4022
+            + 0.4472 * bpm
+            - 0.1263 * weight
+            + 0.074 * age
+        )
     )
 
 
@@ -112,7 +125,9 @@ def calculate_assessment(hr_df, sex, weight):
     # Metabolic Rate
     # ============================================================
 
-    mr = ee * 69.73
+    mr = ee * 16.67
+
+    average_mr = mr.mean()
 
 
     # ============================================================
@@ -121,13 +136,13 @@ def calculate_assessment(hr_df, sex, weight):
 
     action_limit = (
         60.0
-        - 14.1 * math.log10(mr)
+        - 14.1 * math.log10(average_mr)
     )
 
 
     tlv = (
         56.7
-        - 11.5 * math.log10(mr)
+        - 11.5 * math.log10(average_mr)
     )
 
 
@@ -136,7 +151,7 @@ def calculate_assessment(hr_df, sex, weight):
     # ============================================================
 
     work_intensity = classify_work_intensity(
-        mr
+        average_mr
     )
 
 
@@ -150,6 +165,11 @@ def calculate_assessment(hr_df, sex, weight):
 
         "Weight (kg)": round(
             weight,
+            2
+        ),
+
+        "Age": round(
+            age,
             2
         ),
 
@@ -174,7 +194,7 @@ def calculate_assessment(hr_df, sex, weight):
         ),
 
         "Metabolic Rate (W)": round(
-            mr,
+            average_mr,
             2
         ),
 
