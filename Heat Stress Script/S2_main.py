@@ -475,6 +475,12 @@ for (pid, day), hr_data in hr_files.items():
         "Weight"
     ]
 
+    age = demographics[
+        pid
+    ][
+        "Age"
+    ]
+
 
     print(
         f"Calculating assessment: "
@@ -491,7 +497,8 @@ for (pid, day), hr_data in hr_files.items():
     ] = calculate_assessment(
         hr_data,
         sex,
-        weight
+        weight, 
+        age
     )
 
 
