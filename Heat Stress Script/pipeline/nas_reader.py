@@ -267,15 +267,15 @@ def find_raw_temp(pid, day):
                 continue
 
             # Skip preview files
-
             if IGNORE_FILE.lower() in filename.lower():
+                continue
 
+            # Skip files indicating that TEMP data is missing
+            if filename.strip().lower() == "no temp.txt":
                 continue
 
             remote_path = (
-
                 f"{temp_folder}/{filename}"
-
             )
 
             print("\nFOUND RAW TEMP:")
