@@ -15,7 +15,7 @@ from pipeline.summary_builder import build_summary
 from pipeline.demographics_reader import read_demographics
 from pipeline.assessment_calculator import calculate_assessment
 
-from pipeline.azure_hr_reader import (
+from pipeline.nas_reader import (
     find_hr_file,
     download_hr_file
 )
