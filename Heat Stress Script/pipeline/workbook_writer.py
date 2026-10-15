@@ -3,7 +3,6 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 
 def save_workbook(
-    hr_df,
     summary_df,
     processed,
     hr_files,

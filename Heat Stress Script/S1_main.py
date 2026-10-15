@@ -31,13 +31,16 @@ from pipeline.cav_input import select_cav
 from pipeline.nas_reader import find_raw_temp
 from pipeline.nas_reader import download_raw_temp
 
-from tkinter import messagebox
-
-Tk().withdraw()
+root = Tk()
+root.withdraw()
 
 master_file = askopenfilename(
     title="Select Master Data File"
 )
+
+if not master_file:
+    root.destroy()
+    raise Exception("No master data file was selected.")
 
 site_name = os.path.splitext(
     os.path.basename(master_file)
@@ -48,6 +51,13 @@ master_df = load_master_data(master_file)
 pid, day = select_participant_day(master_df)
 
 day = int(float(day))
+
+output_folder = askdirectory(
+    title="Select Output Folder"
+)
+
+if not output_folder:
+    raise Exception("No output folder was selected.")
 
 # ============================================================
 # Search Raw TEMP in NAS
@@ -65,8 +75,7 @@ remote_temp_file = find_raw_temp(
 
 if remote_temp_file is not None:
 
-    # Save NAS Raw TEMP only temporarily.
-    # It will NOT be saved to the user's output folder.
+    # Download Raw TEMP to a temporary folder
     download_folder = tempfile.mkdtemp(
         prefix="raw_temp_"
     )
@@ -93,35 +102,50 @@ if remote_temp_file is not None:
 
 else:
 
-    messagebox.showinfo(
-        "Raw TEMP",
-        "Raw TEMP file was not found in NAS.\n"
-        "Please select the Raw TEMP file manually."
+    print(
+        f"\nRaw TEMP file not found for {pid} D{day}."
     )
 
-    raw_temp_file = askopenfilename(
-        title="Select Raw Temp File"
+    status_df = pd.DataFrame([{
+        "PID": pid,
+        "Day": day,
+        "TEMP Status": "Missing"
+    }])
+
+    status_file = os.path.join(
+        output_folder,
+        f"{pid}_D{day}_status.csv"
     )
 
+    status_df.to_csv(
+        status_file,
+        index=False
+    )
+
+    print("\nTEMP status file created:")
+    print(status_file)
+
+    root.destroy()
+
+    raise SystemExit(0)
 
 # ============================================================
-# Check file selection
+# Read Raw TEMP
 # ============================================================
 
-if not raw_temp_file:
-
-    raise Exception(
-        "No Raw TEMP file was selected."
-    )
-
-print(f"\n[CHECKPOINT] About to call read_raw_temp() on: {raw_temp_file}")
+print(
+    f"\n[CHECKPOINT] About to call read_raw_temp() on: "
+    f"{raw_temp_file}"
+)
 
 df = read_raw_temp(raw_temp_file)
 
-print("[CHECKPOINT] read_raw_temp() finished successfully.")
+print(
+    "[CHECKPOINT] read_raw_temp() finished successfully."
+)
 
 # ============================================================
-# Find TEMP time column regardless of UTC offset
+# Find TEMP time column 
 # ============================================================
 
 time_columns = [
@@ -256,13 +280,6 @@ if hasattr(df[TIME_COL].dt, "tz") and df[TIME_COL].dt.tz is not None:
 # Remove microseconds
 df[TIME_COL] = df[TIME_COL].dt.floor("s")
 
-output_folder = askdirectory(
-    title="Select Output Folder"
-)
-
-if not output_folder:
-    raise Exception("No output folder was selected.")
-
 save_processed(
     df,
     pid,
@@ -271,3 +288,5 @@ save_processed(
 )
 
 print("\nCompleted!")
+
+root.destroy()
