@@ -20,12 +20,6 @@ from Utils.data_utils import select_participant_day
 from pipeline.trimmer import trim_to_work_window
 from pipeline.processed_writer import save_processed
 
-from pipeline.weather_api import (
-    get_coordinates,
-    get_hourly_weather,
-    get_weather_for_time,
-)
-
 from pipeline.wbgt import (
     estimate_globe_temperature,
     calculate_wbgt,
@@ -56,7 +50,7 @@ pid, day = select_participant_day(master_df)
 day = int(float(day))
 
 # ============================================================
-# Search Raw TEMP in Azure
+# Search Raw TEMP in NAS
 # ============================================================
 
 remote_temp_file = find_raw_temp(
@@ -66,12 +60,12 @@ remote_temp_file = find_raw_temp(
 
 
 # ============================================================
-# If found in Azure
+# If found in NAS
 # ============================================================
 
 if remote_temp_file is not None:
 
-    # Save Azure Raw TEMP only temporarily.
+    # Save NAS Raw TEMP only temporarily.
     # It will NOT be saved to the user's output folder.
     download_folder = tempfile.mkdtemp(
         prefix="raw_temp_"
@@ -265,6 +259,9 @@ df[TIME_COL] = df[TIME_COL].dt.floor("s")
 output_folder = askdirectory(
     title="Select Output Folder"
 )
+
+if not output_folder:
+    raise Exception("No output folder was selected.")
 
 save_processed(
     df,
