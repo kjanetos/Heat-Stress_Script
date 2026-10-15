@@ -32,7 +32,14 @@ def build_summary(processed):
         )
 
         if df.empty:
-            print("WARNING: DataFrame is empty. Skipping.")
+            print("TEMP data missing. Adding participant to Summary.")
+
+            rows.append({
+                "PID": pid,
+                "Day": day,
+                "Status": "TEMP Missing"
+            })
+
             continue
 
         # -----------------------------------------
