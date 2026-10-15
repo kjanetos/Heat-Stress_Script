@@ -100,34 +100,34 @@ if remote_temp_file is not None:
 # If NOT found in NAS
 # ============================================================
 
+
 else:
 
     print(
         f"\nRaw TEMP file not found for {pid} D{day}."
     )
 
-    status_df = pd.DataFrame([{
-        "PID": pid,
-        "Day": day,
-        "TEMP Status": "Missing"
-    }])
+    from tkinter import messagebox
 
-    status_file = os.path.join(
-        output_folder,
-        f"{pid}_D{day}_status.csv"
+    messagebox.showinfo(
+        "Raw TEMP Not Found",
+        f"Raw TEMP file for PID {pid}, D{day} "
+        "was not found on NAS.\n"
+        "Please select the Raw TEMP CSV file manually."
     )
 
-    status_df.to_csv(
-        status_file,
-        index=False
+    raw_temp_file = askopenfilename(
+        title=f"Select Raw TEMP File - PID {pid}, D{day}",
+        filetypes=[("CSV Files", "*.csv")]
     )
 
-    print("\nTEMP status file created:")
-    print(status_file)
+    if not raw_temp_file:
+        root.destroy()
+        raise SystemExit("No Raw TEMP file was selected.")
 
-    root.destroy()
+    print("\n[CHECKPOINT] Raw TEMP file selected manually:")
+    print(raw_temp_file)
 
-    raise SystemExit(0)
 
 # ============================================================
 # Read Raw TEMP
