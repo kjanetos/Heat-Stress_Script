@@ -1,5 +1,3 @@
-import pandas as pd
-
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
@@ -19,47 +17,12 @@ def save_workbook(
 
     wb = Workbook()
 
-
     # ============================================================
-    # 1. HR_TEMP sheet
-    # ============================================================
-
-    ws = wb.active
-    ws.title = "HR_TEMP"
-
-    for row in dataframe_to_rows(
-        hr_df,
-        index=False,
-        header=True
-    ):
-        ws.append(row)
-
-
-    # Keep Date format
-    if "Date" in hr_df.columns:
-
-        date_col = (
-            hr_df.columns.get_loc("Date") + 1
-        )
-
-        for row in range(
-            2,
-            ws.max_row + 1
-        ):
-
-            ws.cell(
-                row=row,
-                column=date_col
-            ).number_format = "yyyy-mm-dd"
-
-
-    # ============================================================
-    # 2. Summary sheet
+    # 1. Summary sheet
     # ============================================================
 
-    summary_ws = wb.create_sheet(
-        "Summary"
-    )
+    summary_ws = wb.active
+    summary_ws.title = "Summary"
 
     for row in dataframe_to_rows(
         summary_df,
@@ -70,7 +33,7 @@ def save_workbook(
 
 
     # ============================================================
-    # 3. Processed TEMP + Weather sheets
+    # 2. Processed TEMP + Weather sheets
     # ============================================================
 
     order = sorted(
@@ -110,39 +73,20 @@ def save_workbook(
 
 
         # --------------------------------------------------------
-        # If HR data exists, add HR information
+        # Check original HR data
         # --------------------------------------------------------
 
-        if key in hr_files:
-
-            hr_data = hr_files[key]
-
-            if hr_data is not None:
-
-                print(
-                    f"HR data available for "
-                    f"{pid} D{day}"
-                )
-
+        if key in hr_files and hr_files[key] is not None:
+            print(f"HR data available for {pid} D{day}")
 
         # --------------------------------------------------------
-        # Assessment result
+        # Check assessment Results
         # --------------------------------------------------------
-
         if key in assessment_results:
-
-            assessment = (
-                assessment_results[key]
-            )
-
-            print(
-                f"Assessment available for "
-                f"{pid} D{day}"
-            )
-
+            print(f"Assessment available for {pid} D{day}")
 
     # ============================================================
-    # 4. Save workbook
+    # 3. Save workbook
     # ============================================================
 
     wb.save(

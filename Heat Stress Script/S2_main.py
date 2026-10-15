@@ -12,8 +12,6 @@ from pipeline.processed_reader import read_processed_files
 from pipeline.workbook_writer import save_workbook
 from pipeline.summary_builder import build_summary
 
-from pipeline.hr_temp_reader import read_hr_temp
-
 from pipeline.demographics_reader import read_demographics
 from pipeline.assessment_calculator import calculate_assessment
 
@@ -113,12 +111,11 @@ Tk().withdraw()
 
 
 # ============================================================
-# STEP 1
 # Read Processed TEMP + Weather files
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 1 - Read Processed TEMP files")
+print("Read Processed TEMP files")
 print("=" * 60)
 
 processed = read_processed_files()
@@ -137,54 +134,12 @@ for pid, day in processed.keys():
         f"  PID : {pid}   Day : D{day}"
     )
 
-
 # ============================================================
-# STEP 2
-# Select existing HR_TEMP Export Workbook
+# Search and Download HR files from NAS
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 2 - Select HR_TEMP Export Workbook")
-print("=" * 60)
-
-hr_export_file = askopenfilename(
-    title="Select HR_TEMP Export Workbook",
-    filetypes=[
-        ("Excel Files", "*.xlsx")
-    ]
-)
-
-if not hr_export_file:
-
-    raise Exception(
-        "No HR_TEMP export workbook selected."
-    )
-
-print(
-    "\nSelected HR_TEMP workbook:"
-)
-
-print(
-    hr_export_file
-)
-
-
-# ------------------------------------------------------------
-# Read existing HR_TEMP data
-# ------------------------------------------------------------
-
-hr_df, _ = read_hr_temp(
-    hr_export_file
-)
-
-
-# ============================================================
-# STEP 3
-# Search and Download HR files from Azure
-# ============================================================
-
-print("\n" + "=" * 60)
-print("STEP 3 - Search HR files in Azure")
+print("Search HR files in NAS")
 print("=" * 60)
 
 
@@ -192,7 +147,7 @@ hr_files = {}
 
 
 download_folder = tempfile.mkdtemp(
-    prefix="HR_Azure_"
+    prefix="HR_NAS_"
 )
 
 
@@ -216,7 +171,7 @@ for (pid, day), processed_df in processed.items():
 
 
     # ========================================================
-    # Search Azure
+    # Search NAS
     # ========================================================
 
     hr_blob = find_hr_file(
@@ -226,13 +181,13 @@ for (pid, day), processed_df in processed.items():
 
 
     # ========================================================
-    # HR NOT FOUND IN AZURE
+    # HR NOT FOUND IN NAS
     # ========================================================
 
     if hr_blob is None:
 
         print(
-            f"No HR file found in Azure for "
+            f"No HR file found in NAS for "
             f"{pid} D{day}"
         )
 
@@ -333,7 +288,7 @@ for (pid, day), processed_df in processed.items():
 
 
     # ========================================================
-    # HR FOUND IN AZURE
+    # HR FOUND IN NAS
     # ========================================================
 
     hr_file = download_hr_file(
@@ -352,7 +307,7 @@ for (pid, day), processed_df in processed.items():
 
 
     # --------------------------------------------------------
-    # Read Azure HR workbook
+    # Read NAS HR workbook
     # --------------------------------------------------------
 
     hr_data = pd.read_excel(
@@ -396,12 +351,11 @@ for (pid, day), processed_df in processed.items():
 
 
 # ============================================================
-# STEP 4
 # Select Demographics
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 4 - Select Demographics")
+print("Select Demographics")
 print("=" * 60)
 
 
@@ -409,12 +363,11 @@ demographics = read_demographics()
 
 
 # ============================================================
-# STEP 5
 # Calculate Heat Stress Assessment
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 5 - Calculate Heat Stress Assessment")
+print("Calculate Heat Stress Assessment")
 print("=" * 60)
 
 
@@ -509,12 +462,11 @@ print(
 
 
 # ============================================================
-# STEP 6
 # Build Summary
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 6 - Build Summary")
+print("Build Summary")
 print("=" * 60)
 
 
@@ -524,12 +476,11 @@ summary_df = build_summary(
 
 
 # ============================================================
-# STEP 7
 # Create Temporary HR_TEMP_With_Weather Workbook
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 7 - Create Temporary Workbook")
+print("Create Temporary Workbook")
 print("=" * 60)
 
 
@@ -540,7 +491,6 @@ temp_workbook = os.path.join(
 
 
 save_workbook(
-    hr_df,
     summary_df,
     processed,
     hr_files,
@@ -559,12 +509,11 @@ print(
 
 
 # ============================================================
-# STEP 8
 # Select FINAL Output File
 # ============================================================
 
 print("\n" + "=" * 60)
-print("STEP 8 - Save Final Heat Stress Assessment")
+print("Save Final Heat Stress Assessment")
 print("=" * 60)
 
 
@@ -586,7 +535,6 @@ if not output:
 
 
 # ============================================================
-# STEP 9
 # Apply Assessment Writer
 # ============================================================
 
@@ -603,7 +551,6 @@ write_assessment_results(
 
 
 # ============================================================
-# STEP 10
 # Delete Temporary Workbook
 # ============================================================
 
