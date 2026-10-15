@@ -100,7 +100,6 @@ if remote_temp_file is not None:
 # If NOT found in NAS
 # ============================================================
 
-
 else:
 
     print(
@@ -121,12 +120,40 @@ else:
         filetypes=[("CSV Files", "*.csv")]
     )
 
-    if not raw_temp_file:
-        root.destroy()
-        raise SystemExit("No Raw TEMP file was selected.")
+    # --------------------------------------------------------
+    # If a file is selected manually
+    # --------------------------------------------------------
+    if raw_temp_file:
 
-    print("\n[CHECKPOINT] Raw TEMP file selected manually:")
-    print(raw_temp_file)
+        print("\n[CHECKPOINT] Raw TEMP file selected manually:")
+        print(raw_temp_file)
+
+    # --------------------------------------------------------
+    # If no file is selected, create Missing status CSV
+    # --------------------------------------------------------
+    else:
+
+        status_df = pd.DataFrame([{
+            "PID": pid,
+            "Day": day,
+            "TEMP Status": "Missing"
+        }])
+
+        status_file = os.path.join(
+            output_folder,
+            f"{pid}_D{day}_status.csv"
+        )
+
+        status_df.to_csv(
+            status_file,
+            index=False
+        )
+
+        print("\nTEMP status file created:")
+        print(status_file)
+
+        root.destroy()
+        raise SystemExit(0)
 
 
 # ============================================================
