@@ -134,7 +134,6 @@ def calculate_assessment(hr_df, sex, weight, age):
         ibi_numeric.notna()
     ]
     
-    
     if valid_rest_bpm.empty:
     
         raise ValueError(
@@ -155,18 +154,20 @@ def calculate_assessment(hr_df, sex, weight, age):
     # ============================================================
 
     gender = 1 if sex.lower() == "male" else 0
+
+    bpm_for_ee = valid_rest_bpm
  
     ee = (
         gender * (
             -55.0969
-            + 0.6309 * bpm
+            + 0.6309 * bpm_for_ee
             + 0.1988 * weight
             + 0.2017 * age
         )
         +
         (1 - gender) * (
             -20.4022
-            + 0.4472 * bpm
+            + 0.4472 * bpm_for_ee
             - 0.1263 * weight
             + 0.074 * age
         )

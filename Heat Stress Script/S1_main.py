@@ -34,8 +34,8 @@ from pipeline.wbgt import (
 
 from pipeline.cav_input import select_cav
 
-from pipeline.azure_reader import find_raw_temp
-from pipeline.azure_reader import download_raw_temp
+from pipeline.nas_reader import find_raw_temp
+from pipeline.nas_reader import download_raw_temp
 
 from tkinter import messagebox
 
@@ -53,13 +53,13 @@ master_df = load_master_data(master_file)
 
 pid, day = select_participant_day(master_df)
 
-day = int(day)
+day = int(float(day))
 
 # ============================================================
 # Search Raw TEMP in Azure
 # ============================================================
 
-raw_blob = find_raw_temp(
+remote_temp_file = find_raw_temp(
     pid,
     day
 )
@@ -69,7 +69,7 @@ raw_blob = find_raw_temp(
 # If found in Azure
 # ============================================================
 
-if raw_blob is not None:
+if remote_temp_file is not None:
 
     # Save Azure Raw TEMP only temporarily.
     # It will NOT be saved to the user's output folder.
@@ -78,30 +78,30 @@ if raw_blob is not None:
     )
 
     raw_temp_file = download_raw_temp(
-        raw_blob,
+        remote_temp_file,
         download_folder
     )
 
     if not raw_temp_file:
         raise Exception(
-            "The Raw TEMP file was found in Azure, "
+            "The Raw TEMP file was found in NAS, "
             "but the download failed."
         )
 
     print(
-        "\n[CHECKPOINT] Azure raw file downloaded "
+        "\n[CHECKPOINT] NAS raw file downloaded "
         "to temporary folder."
     )
 
 # ============================================================
-# If NOT found in Azure
+# If NOT found in NAS
 # ============================================================
 
 else:
 
     messagebox.showinfo(
         "Raw TEMP",
-        "Raw TEMP file was not found in Azure.\n"
+        "Raw TEMP file was not found in NAS.\n"
         "Please select the Raw TEMP file manually."
     )
 

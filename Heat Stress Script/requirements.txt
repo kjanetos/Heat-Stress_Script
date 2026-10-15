@@ -4,3 +4,4 @@ requests==2.32.5
 geopy==2.4.1
 numpy==2.3.2
 pythermalcomfort
+paramiko==3.4.4
