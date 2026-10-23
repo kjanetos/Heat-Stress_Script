@@ -1,8 +1,8 @@
 CAV_TABLE = {
-    1: ("Short sleeves and pants", -1),
+    1: ("Short sleeves and pants of woven material", -1),
     2: ("Work clothes (long sleeve shirt and pants)", 0),
-    3: ("Cloth coveralls", 0),
-    4: ("SMS polypropylene coveralls", 0.5),
+    3: ("Cloth (woven material) coveralls", 0),
+    4: ("SMS (Spunbond - Meltblown - Spunbond) polypropylene coveralls", 0.5),
     5: ("Polyolefin coveralls", 1),
     6: ("Double-layer woven clothing", 3),
     7: ("Limited-use vapour-barrier coveralls", 11),
