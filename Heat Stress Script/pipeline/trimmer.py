@@ -103,10 +103,12 @@ def trim_to_work_window(
     #    Include timestamps exactly at end_time.
     # -------------------------------------------------------
 
+    end_time = end_time + pd.Timedelta(seconds=1)
+
     df = df[
         (df[time_col] >= start_time)
         &
-        (df[time_col] <= end_time)
+        (df[time_col] < end_time)
     ].copy()
 
     # -------------------------------------------------------
