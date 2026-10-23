@@ -44,6 +44,13 @@ def get_start_end_time(master_df, pid, day):
         start_clock
     )
 
+    collection_date = pd.Timestamp(collection_date).date()
+
+    if isinstance(end_clock, pd.Timestamp):
+        end_clock = end_clock.time()
+    elif isinstance(end_clock, str):
+        end_clock = pd.to_datetime(end_clock).time()
+
     end_time = pd.Timestamp.combine(
         collection_date,
         end_clock
