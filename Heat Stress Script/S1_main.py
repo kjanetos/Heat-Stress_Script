@@ -217,17 +217,6 @@ df["Clothing Type"] = None
 df["CAV"] = None
 df["WBGTeff (°C)"] = None
 
-CAV_TABLE = {
-    1: ("Short sleeves and pants", -1),
-    2: ("Work clothes (long sleeve shirt and pants)", 0),
-    3: ("Cloth coveralls", 0),
-    4: ("SMS polypropylene coveralls", 0.5),
-    5: ("Polyolefin coveralls", 1),
-    6: ("Double-layer woven clothing", 3),
-    7: ("Limited-use vapour-barrier coveralls", 11),
-    8: ("Adding a hood (full head and neck covering; not face)", 1)
-}
-
 print("\n[CHECKPOINT] Reached site address prompt.")
 
 site_address = input("Site Address: ").strip()
@@ -295,60 +284,78 @@ df["TWA WBGT (°C)"] = twa
 
 cav_intervals = load_cav_intervals()
 
+# Initialize columns
 df["Clothing Type"] = None
 df["CAV"] = None
+df["WBGTeff (°C)"] = None
 
-# TEMP timestamps should already be normalized by the trimmer.
-df[TIME_COL] = pd.to_datetime(
-    df[TIME_COL],
-    errors="coerce"
-)
+if cav_intervals is None:
+    print("CAV file selection cancelled. Skipping CAV calculation.")
 
-# Apply the clothing interval to each TEMP timestamp.
-for interval_index, interval in enumerate(cav_intervals):
-
-    interval_start = interval["Start Time"]
-    interval_end = interval["End Time"]
-
-    # Start inclusive, end exclusive prevents boundary overlap.
-    mask = (
-        (df[TIME_COL] >= interval_start)
-        &
-        (df[TIME_COL] < interval_end)
+else:
+    # Normalize TEMP timestamps
+    df[TIME_COL] = pd.to_datetime(
+        df[TIME_COL],
+        errors="coerce"
     )
 
-    # Include the final endpoint for the last interval only.
-    if interval_index == len(cav_intervals) - 1:
-        mask = (
-            (df[TIME_COL] >= interval_start)
-            &
-            (df[TIME_COL] <= interval_end)
+    print("\n[DEBUG] TEMP time samples:")
+    print(df[TIME_COL].head(5).to_list())
+
+    print("\n[DEBUG] Clothing interval samples:")
+
+    for interval in cav_intervals[:3]:
+        print(
+            repr(interval["Start Time"]),
+            "to",
+            repr(interval["End Time"]),
+            "|",
+            interval["Clothing Type"],
+            "| CAV:",
+            interval["CAV"]
         )
 
-    df.loc[mask, "Clothing Type"] = (
-        interval["Clothing Type"]
+    # Apply clothing intervals
+    for i, interval in enumerate(cav_intervals):
+        interval_start = interval["Start Time"]
+        interval_end = interval["End Time"]
+
+        # Include start, exclude end to avoid duplicate boundary matches
+        mask = (
+            (df[TIME_COL] >= interval_start)
+            & (df[TIME_COL] < interval_end)
+        )
+
+        # Include the final endpoint of the last interval
+        if i == len(cav_intervals) - 1:
+            mask = (
+                (df[TIME_COL] >= interval_start)
+                & (df[TIME_COL] <= interval_end)
+            )
+
+        df.loc[mask, "Clothing Type"] = interval["Clothing Type"]
+        df.loc[mask, "CAV"] = interval["CAV"]
+
+    # Calculate effective WBGT
+    df["WBGTeff (°C)"] = (
+        pd.to_numeric(df["WBGT (°C)"], errors="coerce")
+        + pd.to_numeric(df["CAV"], errors="coerce")
     )
 
-    df.loc[mask, "CAV"] = interval["CAV"]
+    # Check matching results
+    matched = df["Clothing Type"].notna().sum()
+    unmatched = df["Clothing Type"].isna().sum()
 
-# Calculate effective WBGT using the interval-specific CAV.
-df["WBGTeff (°C)"] = (
-    df["WBGT (°C)"]
-    + pd.to_numeric(df["CAV"], errors="coerce")
-)
+    print(f"CAV matched rows: {matched}")
+    print(f"CAV unmatched rows: {unmatched}")
 
-# Report any TEMP rows without a matching clothing interval.
-unmatched = df["Clothing Type"].isna()
-
-if unmatched.any():
-    print(
-        f"\nWARNING: {unmatched.sum()} TEMP rows "
-        "did not match a clothing interval."
-    )
-
-    print(
-        df.loc[unmatched, TIME_COL].head(10).to_list()
-    )
+    if unmatched > 0:
+        print("Unmatched TEMP timestamps:")
+        print(
+            df.loc[ df["Clothing Type"].isna(), TIME_COL]
+            .head(10)
+            .to_list()
+        )
 
 # Convert time to a clean datetime format before saving
 df[TIME_COL] = pd.to_datetime(

@@ -34,9 +34,8 @@ def load_cav_intervals(file_path=None):
         )
 
     if not file_path:
-        raise ValueError(
-            "No Live Notation file was selected."
-        )
+        print("CAV file selection cancelled.")
+        return None
 
     wbgt_df = pd.read_excel(
         file_path,
